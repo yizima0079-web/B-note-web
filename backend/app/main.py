@@ -14,8 +14,26 @@ from .db import init_db, is_serverless
 from .routers import auth, bilibili, ima, notes
 from .services.task_queue import TaskQueue
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("bilirecall")
+
+def _setup_logging() -> logging.Logger:
+    """显式装配自己的 handler，不依赖 root logger。
+
+    uvicorn 只配置 uvicorn.* 系列 logger，Serverless 平台也不保证 root 有 handler，
+    交给 basicConfig 会出现「WARNING 看得到、INFO 看不到」的随机行为。
+    """
+    log = logging.getLogger("bilirecall")
+    if not log.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", "%Y-%m-%d %H:%M:%S")
+        )
+        log.addHandler(handler)
+    log.setLevel(logging.INFO)
+    log.propagate = False
+    return log
+
+
+logger = _setup_logging()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
