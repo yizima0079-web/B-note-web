@@ -5,7 +5,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # 配置统一从 backend/.env 读取（run.bat 每次启动会把根目录 .env 同步为同一份）
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # .env.local 由 `vercel env pull` 产出，优先级高于 .env，且不入库
+    model_config = SettingsConfigDict(
+        env_file=(".env", ".env.local"), env_file_encoding="utf-8", extra="ignore"
+    )
 
     # 应用安全
     app_password: str = "change-me"

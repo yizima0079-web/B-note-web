@@ -32,9 +32,12 @@ vercel link                     # 关联到 B-note-web 项目
 vercel env add SECRET_KEY production
 vercel env add SECRET_KEY preview
 # ... 其余变量同理，按 Production / Preview 分开配置
-vercel env pull .env.local      # 本地同步，勿手抄
+vercel env pull backend/.env.local   # 本地同步，勿手抄
 vercel --prod                   # 改完变量必须重新部署
 ```
+
+Pull 到 `backend/.env.local` 的原因：后端进程的 CWD 是 `backend/`，`config.py` 的加载顺序是
+`.env` → `.env.local`，后者覆盖前者，因此从控制台拉下来的值会直接生效，且该文件已被 `.gitignore` 排除。
 
 Preview 环境建议接独立的测试库 / 测试 Key，避免预览站污染生产数据。
 
