@@ -1,0 +1,18 @@
+# ── 依赖清单 ─────────────────────────────────────────────
+# 采用「下限约束」写法：让 pip 自动选择与当前 Python 版本匹配的
+# 已编译 wheel，可兼容 Python 3.11 ~ 3.14，避免在新版 Python 上
+# 因旧版 pydantic-core 触发 Rust 源码编译而失败。
+#
+# 强烈建议使用 Python 3.11 / 3.12（兼容性最佳）；
+# 若坚持使用 3.13 / 3.14，请确保 pip 较新：python -m pip install -U pip
+
+fastapi>=0.115
+uvicorn[standard]>=0.32
+httpx>=0.27
+SQLAlchemy>=2.0.36
+pydantic>=2.12          # 2.12+ 的 pydantic-core 才提供 Python 3.14 预编译 wheel
+pydantic-settings>=2.6
+PyJWT>=2.10
+cryptography>=44
+python-multipart>=0.0.20
+qrcode[pil]>=8.0

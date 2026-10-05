@@ -1,0 +1,13 @@
+# 锁定版依赖清单 —— 适用于 Python 3.11 / 3.12（推荐环境）
+# 用途：需要完全可复现的构建时使用
+#   pip install -r backend/requirements.lock.txt
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+httpx==0.27.2
+SQLAlchemy==2.0.36
+pydantic==2.10.3
+pydantic-settings==2.6.1
+PyJWT==2.10.1
+cryptography==44.0.0
+python-multipart==0.0.20
+qrcode[pil]==8.0

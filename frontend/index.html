@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>哔记 BiliRecall · 收藏夹知识笔记</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/manrope@5.2.8/index.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/noto-sans-sc@5.2.10/index.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5.2.8/index.css" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --surface:#ffffff;
+    --surface-2:#f1f2f5;
+    --fg:#18191c;
+    --muted:#61666d;
+    --border:#e3e5e7;
+    --accent:#fb7299;
+    --accent-ink:#d5436c;
+    --info:#00aeec;
+    --ok:#2aa55f;
+    --warn:#e0a400;
+    --danger:#e2483d;
+
+    --accent-soft:color-mix(in oklch,var(--accent) 14%,transparent);
+    --info-soft:color-mix(in oklch,var(--info) 12%,transparent);
+    --fg-soft:color-mix(in oklch,var(--fg) 6%,transparent);
+
+    --font-display:'Manrope Variable','Noto Sans SC Variable','PingFang SC','Microsoft YaHei',sans-serif;
+    --font-body:'Manrope Variable','Noto Sans SC Variable','PingFang SC','Microsoft YaHei',sans-serif;
+    --font-mono:'JetBrains Mono Variable',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+
+    --fs-h1:28px; --fs-h2:20px; --fs-h3:16px; --fs-body:14px; --fs-meta:12px;
+    --gap-xs:6px; --gap-sm:10px; --gap-md:16px; --gap-lg:24px; --gap-xl:36px;
+    --radius:10px; --radius-lg:14px; --radius-sm:7px;
+    --shadow:0 1px 2px rgba(24,25,28,.04),0 8px 24px -12px rgba(24,25,28,.12);
+    --sidebar:236px;
+  }
+  html[data-theme="dark"]{
+    --bg:#121417;
+    --surface:#1b1e23;
+    --surface-2:#23262c;
+    --fg:#e8eaed;
+    --muted:#9aa0a6;
+    --border:#2e3238;
+    --accent:#fb7299;
+    --accent-ink:#fb8bab;
+    --info:#4db8e8;
+    --accent-soft:color-mix(in oklch,var(--accent) 20%,transparent);
+    --info-soft:color-mix(in oklch,var(--info) 16%,transparent);
+    --fg-soft:color-mix(in oklch,var(--fg) 8%,transparent);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+  }
+  html[data-theme="bili"]{
+    --bg:#fff5f8;
+    --surface:#ffffff;
+    --surface-2:#fdeef3;
+    --fg:#233047;
+    --muted:#7a8699;
+    --border:#ffd9e4;
+    --accent:#fb7299;
+    --accent-ink:#e2527d;
+    --info:#00aeec;
+    --accent-soft:color-mix(in oklch,var(--accent) 16%,transparent);
+    --info-soft:color-mix(in oklch,var(--info) 14%,transparent);
+    --fg-soft:color-mix(in oklch,var(--fg) 6%,transparent);
+    --shadow:0 1px 2px rgba(251,114,153,.08),0 8px 24px -12px rgba(251,114,153,.25);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:var(--fs-body);line-height:1.6;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+  img{display:block;max-width:100%}
+  button{font:inherit;cursor:pointer}
+  p{margin:0}
+  h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance;letter-spacing:-.01em}
+  [hidden]{display:none !important}
+  .num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .muted{color:var(--muted)}
+  .hidden-radio{position:absolute;opacity:0;width:0;height:0}
+
+  /* ── buttons ── */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 15px;border-radius:var(--radius-sm);border:1px solid transparent;font-size:13px;font-weight:600;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .05s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-ink)}
+  .btn-secondary{background:var(--surface);color:var(--fg);border-color:var(--border)}
+  .btn-secondary:hover{border-color:var(--muted)}
+  .btn-ghost{background:transparent;color:var(--muted)}
+  .btn-ghost:hover{color:var(--fg);background:var(--fg-soft)}
+  .btn-danger{background:transparent;color:var(--danger);border-color:color-mix(in oklch,var(--danger) 30%,transparent)}
+  .btn-danger:hover{background:color-mix(in oklch,var(--danger) 8%,transparent)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .btn-sm{padding:5px 10px;font-size:12px}
+  .icon{width:16px;height:16px;flex:none}
+
+  /* ── login ── */
+  #loginView{min-height:100vh;display:grid;place-items:center;padding:24px}
+  .login-card{width:min(400px,100%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 32px;box-shadow:var(--shadow)}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:800;font-family:var(--font-display)}
+  .brand-name{font-family:var(--font-display);font-weight:700;font-size:18px}
+  .login-card h1{font-size:var(--fs-h1);margin-top:18px}
+  .login-card p.sub{color:var(--muted);margin-top:6px;font-size:13px}
+  .field{margin-top:20px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--fg);font-size:14px}
+  .input:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px var(--accent-soft)}
+  .form-msg{margin-top:14px;font-size:13px;color:var(--danger);min-height:18px}
+
+  /* ── app shell ── */
+  #appView{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13.5px;text-align:left;width:100%}
+  .nav-item:hover{background:var(--fg-soft);color:var(--fg)}
+  .nav-item[aria-current="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+  .nav-item .icon{width:17px;height:17px}
+  .nav-badge{margin-left:auto;font-family:var(--font-mono);font-size:11px;background:var(--surface-2);color:var(--muted);padding:1px 7px;border-radius:20px}
+  .nav-item[aria-current="true"] .nav-badge{background:var(--surface);color:var(--accent-ink)}
+  .brand.side{padding:0 8px 14px}
+  .sidebar-foot{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .who{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;background:var(--surface-2);flex:none}
+
+  .main{min-width:0;display:flex;flex-direction:column}
+  .topbar{position:sticky;top:0;z-index:20;background:color-mix(in oklch,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;gap:16px}
+  .topbar h1{font-size:var(--fs-h2);font-weight:700}
+  .topbar .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px}
+  .view{padding:24px 28px 64px;max-width:1180px;width:100%}
+
+  /* ── cards ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+  .card + .card{margin-top:18px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .card-head h2{font-size:var(--fs-h3);font-weight:700}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px}
+
+  /* ── signature: unread backlog ── */
+  .backlog{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:center}
+  .backlog-figure{font-family:var(--font-display);font-weight:800;font-size:44px;line-height:1;letter-spacing:-.03em;color:var(--accent-ink)}
+  .backlog-figure small{font-size:15px;color:var(--muted);font-weight:600;font-family:var(--font-body)}
+  .bar{height:12px;border-radius:20px;background:var(--surface-2);overflow:hidden;display:flex;margin:14px 0 10px}
+  .bar > span{height:100%}
+  .bar .done{background:var(--accent)}
+  .bar .rest{background:color-mix(in oklch,var(--info) 55%,transparent)}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  /* ── folder list ── */
+  .folder-row{display:flex;align-items:center;gap:14px;padding:12px;border-radius:var(--radius);border:1px solid transparent}
+  .folder-row:hover{background:var(--surface-2)}
+  .folder-row.active{border-color:var(--accent);background:var(--accent-soft)}
+  .folder-cover{width:52px;height:52px;border-radius:var(--radius-sm);object-fit:cover;background:var(--surface-2);flex:none}
+  .folder-meta{min-width:0;flex:1}
+  .folder-meta b{display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .folder-meta span{font-size:12px;color:var(--muted)}
+  .folder-count{font-family:var(--font-mono);font-size:12.5px;color:var(--muted)}
+
+  /* ── video grid ── */
+  .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .vcard{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);display:flex;flex-direction:column;transition:border-color .15s ease,box-shadow .15s ease}
+  .vcard:hover{box-shadow:var(--shadow)}
+  .vcard.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+  .vcard .thumb{position:relative;aspect-ratio:16/9;background:var(--surface-2);overflow:hidden}
+  .vcard .thumb img{width:100%;height:100%;object-fit:cover}
+  .vcard .dur{position:absolute;right:8px;bottom:8px;background:rgba(24,25,28,.75);color:#fff;font-family:var(--font-mono);font-size:11px;padding:1px 6px;border-radius:4px}
+  .vcard .check{position:absolute;left:8px;top:8px;width:22px;height:22px;border-radius:6px;border:2px solid #fff;background:rgba(24,25,28,.35);display:grid;place-items:center;color:#fff}
+  .vcard.selected .check{background:var(--accent);border-color:var(--accent)}
+  .vcard .check svg{width:13px;height:13px;opacity:0}
+  .vcard.selected .check svg{opacity:1}
+  .vcard .body{padding:11px 12px 13px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .vcard .body b{font-size:13px;font-weight:600;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .vcard .by{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .vcard .by .icon{width:13px;height:13px}
+  .pickbar{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--border)}
+  .pickbar .spacer{flex:1}
+
+  /* ── collection scope ── */
+  .scope-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);margin-top:10px;flex-wrap:wrap}
+  .scope-row .grow{flex:1;min-width:150px}
+  .scope-row b{font-size:13.5px}
+  .scope-row .muted{font-size:12px}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+  .stepper button{border:0;background:var(--surface);padding:6px 10px;color:var(--muted)}
+  .stepper button:hover{background:var(--surface-2);color:var(--fg)}
+  .stepper input{width:52px;border:0;text-align:center;font-family:var(--font-mono);font-size:13px;background:var(--surface);padding:6px 0;color:var(--fg)}
+  .stepper input:focus{outline:none}
+  .lbl{font-size:12px;color:var(--muted);font-weight:600}
+
+  /* ── chips / segmented ── */
+  .segmented{display:inline-flex;background:var(--surface-2);border-radius:var(--radius-sm);padding:3px;gap:2px}
+  .segmented button{border:0;background:transparent;padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .segmented button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(24,25,28,.08)}
+
+  /* ── job / notes ── */
+  .job-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--surface)}
+  .job-card + .job-card{margin-top:12px}
+  .job-top{display:flex;align-items:center;gap:12px}
+  .job-top b{font-size:14px}
+  .job-top .spacer{flex:1}
+  .pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;font-family:var(--font-mono)}
+  .pill.pending{background:var(--surface-2);color:var(--muted)}
+  .pill.running{background:var(--info-soft);color:var(--info)}
+  .pill.done{background:color-mix(in oklch,var(--ok) 14%,transparent);color:var(--ok)}
+  .pill.failed{background:color-mix(in oklch,var(--danger) 12%,transparent);color:var(--danger)}
+  .progress{height:8px;border-radius:20px;background:var(--surface-2);overflow:hidden;margin-top:12px}
+  .progress > span{display:block;height:100%;background:var(--accent);transition:width .3s ease}
+  .item-line{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:13px}
+  .item-line .icon{width:15px;height:15px;flex:none}
+  .item-line .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .st-dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .st-done{background:var(--ok)} .st-run{background:var(--info)} .st-fail{background:var(--danger)} .st-wait{background:var(--border)}
+
+  /* ── note drawer ── */
+  .drawer{position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end}
+  .drawer-scrim{position:absolute;inset:0;background:rgba(24,25,28,.42)}
+  .drawer-panel{position:relative;width:min(720px,100%);height:100%;background:var(--surface);box-shadow:-12px 0 40px -20px rgba(24,25,28,.4);display:flex;flex-direction:column}
+  .drawer-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+  .drawer-head h2{font-size:17px;flex:1;line-height:1.4}
+  .drawer-body{padding:26px 30px 60px;overflow:auto;flex:1}
+  .note-md{font-size:14.5px;line-height:1.78;color:var(--fg)}
+  .note-md h1{font-size:23px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .note-md h2{font-size:17px;margin:24px 0 10px}
+  .note-md h3{font-size:15px;margin:18px 0 8px}
+  .note-md blockquote{margin:0 0 18px;padding:12px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--fg)}
+  .note-md ul,.note-md ol{padding-left:22px;margin:8px 0}
+  .note-md li{margin:4px 0}
+  .note-md code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+  .note-md :first-child{margin-top:0}
+
+  /* ── qr modal ── */
+  .modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:24px}
+  .modal-scrim{position:absolute;inset:0;background:rgba(24,25,28,.45)}
+  .modal-card{position:relative;width:min(380px,100%);background:var(--surface);border-radius:var(--radius-lg);padding:28px;text-align:center;box-shadow:var(--shadow)}
+  .modal-card h2{font-size:18px}
+  .modal-card p{color:var(--muted);font-size:13px;margin-top:6px}
+  .qr-box{margin:20px auto 0;width:210px;height:210px;border:1px solid var(--border);border-radius:var(--radius);display:grid;place-items:center;background:var(--surface-2);overflow:hidden}
+  .qr-box img{width:100%;height:100%}
+  .qr-status{margin-top:14px;font-size:13px;font-weight:600}
+  .spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── toast ── */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;background:var(--fg);color:#fff;padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow);opacity:0;transition:opacity .2s ease;pointer-events:none}
+  #toast.show{opacity:1}
+
+  .empty{text-align:center;padding:48px 20px;color:var(--muted)}
+  .empty .icon{width:34px;height:34px;margin:0 auto 12px;color:var(--border)}
+  .skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--bg) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:var(--radius-sm);height:14px}
+  @keyframes sh{to{background-position:-200% 0}}
+
+  @media (max-width:900px){
+    #appView{grid-template-columns:1fr}
+    .sidebar{position:static;height:auto;flex-direction:row;overflow-x:auto;gap:4px;padding:10px}
+    .brand.side,.sidebar-foot{display:none}
+    .backlog{grid-template-columns:1fr;gap:14px}
+    .view,.topbar{padding-inline:16px}
+    .video-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 登录 ══════════ -->
+<section id="loginView">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-mark">哔</div>
+      <span class="brand-name">哔记 BiliRecall</span>
+    </div>
+    <h1>把囤着的收藏，变成能复习的笔记</h1>
+    <p class="sub">登录后即可扫码绑定 B 站，选择收藏夹中的视频或合集，一键生成结构化知识笔记。</p>
+    <div class="field">
+      <label for="pw">访问口令</label>
+      <input id="pw" class="input" type="password" autocomplete="current-password" placeholder="请输入本应用访问口令" />
+    </div>
+    <div class="form-msg" id="loginMsg"></div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%;margin-top:8px">进入工作台</button>
+  </div>
+</section>
+
+<!-- ══════════ 工作台 ══════════ -->
+<div id="appView" hidden>
+  <aside class="sidebar">
+    <div class="brand side">
+      <div class="brand-mark">哔</div>
+      <span class="brand-name">哔记</span>
+    </div>
+    <button class="nav-item" data-nav="pick" aria-current="true">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M9 5v14"/></svg>
+      收藏夹选片
+    </button>
+    <button class="nav-item" data-nav="jobs">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="8"/></svg>
+      生成任务
+      <span class="nav-badge num" id="navJobs">0</span>
+    </button>
+    <button class="nav-item" data-nav="notes">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/></svg>
+      我的笔记
+      <span class="nav-badge num" id="navNotes">0</span>
+    </button>
+    <div class="sidebar-foot">
+      <div class="who" id="who">
+        <img class="avatar" id="whoFace" alt="" hidden referrerpolicy="no-referrer" />
+        <span id="whoName" class="muted">未绑定账号</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="bindBtn" style="width:100%">扫码绑定 B 站</button>
+      <button class="btn btn-secondary btn-sm" id="imaBtn" style="width:100%;margin-top:6px">连接 ima 知识库</button>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn" style="width:100%;margin-top:6px">退出登录</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="pageTitle">收藏夹选片</h1>
+        <div class="sub" id="pageSub">绑定账号后选择要整理的视频</div>
+      </div>
+      <div class="topbar-actions" id="topActions"></div>
+      <div class="segmented theme-seg" id="themeSeg" title="背景配色">
+        <button data-t="light" aria-pressed="true">浅色</button>
+        <button data-t="dark" aria-pressed="false">深色</button>
+        <button data-t="bili" aria-pressed="false">B站粉</button>
+      </div>
+    </header>
+    <div class="view" id="viewRoot"></div>
+  </main>
+</div>
+
+<!-- ══════════ 二维码弹窗 ══════════ -->
+<div class="modal" id="qrModal" hidden>
+  <div class="modal-scrim" data-close="qr"></div>
+  <div class="modal-card">
+    <h2>扫码登录 B 站</h2>
+    <p>使用 B 站手机客户端扫描二维码完成绑定</p>
+    <div class="qr-box" id="qrBox"><span class="spinner"></span></div>
+    <div class="qr-status" id="qrStatus">正在获取二维码…</div>
+    <button class="btn btn-secondary btn-sm" id="qrClose" style="margin-top:18px">取消</button>
+  </div>
+</div>
+
+<!-- ══════════ ima 连接弹窗 ══════════ -->
+<div class="modal" id="imaModal" hidden>
+  <div class="modal-scrim" data-close="ima"></div>
+  <div class="modal-card">
+    <h2>连接 ima 知识库</h2>
+    <p>在 <a href="https://ima.qq.com/agent-interface" target="_blank" rel="noopener">ima 开放接口页</a> 创建应用后获取以下两项</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;text-align:left">
+      <label style="font-size:13px">Client ID
+        <input id="imaClientId" type="text" placeholder="ima-openapi-clientid" style="width:100%;margin-top:4px;padding:8px;border:1px solid var(--border,#ddd);border-radius:8px" />
+      </label>
+      <label style="font-size:13px">API Key
+        <input id="imaApiKey" type="password" placeholder="ima-openapi-apikey" style="width:100%;margin-top:4px;padding:8px;border:1px solid var(--border,#ddd);border-radius:8px" />
+      </label>
+      <div class="qr-status" id="imaStatus"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary btn-sm" id="imaSaveBtn" style="flex:1">保存并绑定</button>
+        <button class="btn btn-secondary btn-sm" id="imaTestBtn" style="flex:1">测试连通</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="imaClose" style="margin-top:4px">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 推送到 ima 弹窗 ══════════ -->
+<div class="modal" id="pushImaModal" hidden>
+  <div class="modal-scrim" data-close="pushima"></div>
+  <div class="modal-card">
+    <h2>推送到 ima 知识库</h2>
+    <p>选择目标知识库（新仓库请先在 ima 客户端中创建，接口暂不支持新建）</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;text-align:left">
+      <label style="font-size:13px">目标知识库
+        <select id="imaKbSelect" style="width:100%;margin-top:4px;padding:8px;border:1px solid var(--border,#ddd);border-radius:8px">
+          <option value="">加载中…</option>
+        </select>
+      </label>
+      <label style="font-size:13px">笔记标题
+        <input id="imaPushTitle" type="text" style="width:100%;margin-top:4px;padding:8px;border:1px solid var(--border,#ddd);border-radius:8px" />
+      </label>
+      <div class="qr-status" id="imaPushStatus"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary btn-sm" id="imaPushGo" style="flex:1">推送</button>
+        <button class="btn btn-ghost btn-sm" id="imaPushClose" style="flex:1">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 笔记抽屉 ══════════ -->
+<div class="drawer" id="noteDrawer" hidden>
+  <div class="drawer-scrim" data-close="note"></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <h2 id="noteTitle">笔记</h2>
+      <button class="btn btn-secondary btn-sm" id="noteExport">导出 Markdown</button>
+      <button class="btn btn-primary btn-sm" id="notePushIma">推送到 ima</button>
+      <button class="btn btn-ghost btn-sm" data-close="note">关闭</button>
+    </div>
+    <div class="drawer-body">
+      <article class="note-md" id="noteBody"></article>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════ 基础工具 ═══════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const API = "";
+
+function getCookie(name){
+  const m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+  return m ? decodeURIComponent(m[1]) : "";
+}
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function fmtDur(sec){
+  sec = Math.max(0, sec | 0);
+  const h = (sec / 3600) | 0, m = ((sec % 3600) / 60) | 0, s = sec % 60;
+  const mm = String(m).padStart(2, "0"), ss = String(s).padStart(2, "0");
+  return h > 0 ? h + ":" + mm + ":" + ss : mm + ":" + ss;
+}
+async function api(path, opts = {}){
+  opts.headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+  if (opts.method === "POST" || opts.method === "DELETE"){
+    const csrf = getCookie("br_csrf");
+    if (csrf) opts.headers["X-CSRF-Token"] = csrf;
+  }
+  const res = await fetch(API + path, Object.assign({ credentials: "same-origin" }, opts));
+  if (res.status === 401){ showLogin(); throw new Error("未登录"); }
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!res.ok) throw new Error(data.detail || ("请求失败 " + res.status));
+  return data;
+}
+
+/* ═══════════ 极简 Markdown 渲染（安全转义） ═══════════ */
+function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function renderMarkdown(md){
+  const lines = escapeHtml(md || "").split(/\r?\n/);
+  let html = "", inUl = false, inOl = false, inBq = false;
+  const closeLists = () => { if (inUl){ html += "</ul>"; inUl = false; } if (inOl){ html += "</ol>"; inOl = false; } };
+  const closeBq = () => { if (inBq){ html += "</blockquote>"; inBq = false; } };
+  for (let raw of lines){
+    const line = raw.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`(.+?)`/g, "<code>$1</code>");
+    let m;
+    if ((m = line.match(/^###\s+(.*)/))){ closeLists(); closeBq(); html += "<h3>" + m[1] + "</h3>"; continue; }
+    if ((m = line.match(/^##\s+(.*)/))){ closeLists(); closeBq(); html += "<h2>" + m[1] + "</h2>"; continue; }
+    if ((m = line.match(/^#\s+(.*)/))){ closeLists(); closeBq(); html += "<h1>" + m[1] + "</h1>"; continue; }
+    if ((m = line.match(/^>\s?(.*)/))){ closeLists(); if (!inBq){ html += "<blockquote>"; inBq = true; } html += m[1] + "<br/>"; continue; }
+    if ((m = line.match(/^\s*[-*]\s+(.*)/))){ closeBq(); if (!inUl){ closeLists(); html += "<ul>"; inUl = true; } html += "<li>" + m[1] + "</li>"; continue; }
+    if ((m = line.match(/^\s*\d+\.\s+(.*)/))){ closeBq(); if (!inOl){ closeLists(); html += "<ol>"; inOl = true; } html += "<li>" + m[1] + "</li>"; continue; }
+    if (!line.trim()){ closeLists(); closeBq(); continue; }
+    closeLists(); closeBq(); html += "<p>" + line + "</p>";
+  }
+  closeLists(); closeBq();
+  return html;
+}
+
+/* ═══════════ 状态 ═══════════ */
+const state = {
+  account: null,
+  folders: [],
+  activeFolder: null,
+  resources: [],
+  selected: new Set(),
+  jobs: [],
+  notes: [],
+  polling: null,
+  style: "knowledge",
+};
+
+/* ═══════════ 登录 ═══════════ */
+function showLogin(){ $("#loginView").hidden = false; $("#appView").hidden = true; }
+function showApp(){ $("#loginView").hidden = true; $("#appView").hidden = false; }
+
+$("#loginBtn").addEventListener("click", doLogin);
+$("#pw").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+async function doLogin(){
+  const pw = $("#pw").value;
+  $("#loginMsg").textContent = "";
+  try {
+    const r = await api("/api/auth/login", { method: "POST", body: JSON.stringify({ password: pw }) });
+    if (!r.ok){ $("#loginMsg").textContent = r.message || "口令错误"; return; }
+    await boot();
+  } catch (e){ $("#loginMsg").textContent = e.message; }
+}
+$("#logoutBtn").addEventListener("click", async () => {
+  try { await api("/api/auth/logout", { method: "POST" }); } catch (e){}
+  showLogin();
+});
+
+/* ═══════════ 启动 ═══════════ */
+async function boot(){
+  showApp();
+  try { state.account = await api("/api/bilibili/account"); } catch (e){ state.account = { bound: false }; }
+  renderAccount();
+  await Promise.all([loadJobs(), loadNotes()]);
+  await loadFolders();
+  navTo("pick");
+}
+
+function renderAccount(){
+  const a = state.account || {};
+  if (a.bound){
+    $("#whoName").textContent = a.uname || ("UID " + a.mid);
+    if (a.face){ const f = $("#whoFace"); f.src = a.face; f.hidden = false; }
+    $("#bindBtn").textContent = "重新绑定账号";
+  } else {
+    $("#whoName").textContent = "未绑定账号";
+    $("#whoFace").hidden = true;
+    $("#bindBtn").textContent = "扫码绑定 B 站";
+  }
+}
+
+/* ═══════════ 导航 ═══════════ */
+$$(".nav-item").forEach(btn => btn.addEventListener("click", () => navTo(btn.dataset.nav)));
+function navTo(view){
+  $$(".nav-item").forEach(b => b.setAttribute("aria-current", String(b.dataset.nav === view)));
+  const titles = { pick: ["收藏夹选片", "选择要整理成笔记的视频或合集"], jobs: ["生成任务", "查看笔记生成进度"], notes: ["我的笔记", "查看与导出已生成的笔记"] };
+  $("#pageTitle").textContent = titles[view][0];
+  $("#pageSub").textContent = titles[view][1];
+  const acts = $("#topActions"); acts.innerHTML = "";
+  if (view === "pick"){
+    const b = document.createElement("button"); b.className = "btn btn-secondary btn-sm"; b.id = "refreshFolders";
+    b.textContent = "刷新收藏夹"; b.addEventListener("click", loadFolders); acts.appendChild(b);
+  }
+  if (view === "jobs"){
+    const b = document.createElement("button"); b.className = "btn btn-secondary btn-sm"; b.id = "refreshJobs";
+    b.textContent = "刷新"; b.addEventListener("click", loadJobs); acts.appendChild(b);
+  }
+  const renderers = { pick: renderPick, jobs: renderJobs, notes: renderNotes };
+  renderers[view]();
+}
+
+/* ═══════════ 主题切换 ═══════════ */
+function initTheme(){
+  const saved = localStorage.getItem("br_theme") || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+  $$("#themeSeg button").forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.t === saved));
+    b.addEventListener("click", () => {
+      document.documentElement.setAttribute("data-theme", b.dataset.t);
+      localStorage.setItem("br_theme", b.dataset.t);
+      $$("#themeSeg button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.t === b.dataset.t)));
+    });
+  });
+}
+initTheme();
+
+/* ═══════════ 收藏夹 ═══════════ */
+async function loadFolders(){
+  if (!state.account || !state.account.bound){
+    state.folders = [];
+    if ($$(".nav-item").find(b => b.getAttribute("aria-current") === "true")?.dataset.nav === "pick") renderPick();
+    return;
+  }
+  try { const r = await api("/api/bilibili/folders"); state.folders = r.folders || []; }
+  catch (e){ toast(e.message); state.folders = []; }
+  renderPick();
+}
+async function loadResources(mediaId){
+  try { const r = await api("/api/bilibili/folders/" + mediaId + "/resources?pn=1&ps=30"); state.resources = r.items || []; }
+  catch (e){ toast(e.message); state.resources = []; }
+  renderPick();
+}
+function renderPick(){
+  const root = $("#viewRoot"); root.innerHTML = "";
+  if (!state.account || !state.account.bound){
+    root.appendChild(el("div", { class: "card empty" }, [
+      iconBox("link"),
+      h3("还没有绑定 B 站账号"),
+      p("点击左下角「扫码绑定 B 站」，用手机 B 站客户端扫码即可开始。")
+    ]));
+    return;
+  }
+  const total = state.folders.reduce((s, f) => s + (f.count || 0), 0);
+  root.appendChild(backlogCard(total));
+  root.appendChild(folderCard());
+  root.appendChild(urlBar());
+  if (state.activeFolder) root.appendChild(pickCard());
+}
+function backlogCard(total){
+  const summarized = state.notes.length;
+  const rest = Math.max(0, total - summarized);
+  const pct = total ? Math.min(100, Math.round(summarized / total * 100)) : 0;
+  const figure = el("div", { class: "backlog-figure" }, [document.createTextNode(String(rest)), el("small", {}, [document.createTextNode(" 个视频待整理")])]);
+  const bar = el("div", { class: "bar" });
+  bar.appendChild(el("span", { class: "done", style: "width:" + pct + "%" }));
+  bar.appendChild(el("span", { class: "rest", style: "width:" + (100 - pct) + "%" }));
+  const legend = el("div", { class: "legend" }, [
+    el("span", {}, [el("i", { class: "dot", style: "background:var(--accent)" }), document.createTextNode("已生成 " + summarized)]),
+    el("span", {}, [el("i", { class: "dot", style: "background:color-mix(in oklch,var(--info) 55%,transparent)" }), document.createTextNode("待整理 " + rest)]),
+  ]);
+  return el("div", { class: "card" }, [
+    el("div", { class: "backlog" }, [
+      el("div", {}, [
+        el("p", { class: "eyebrow" }, [document.createTextNode("收藏积压")]),
+        figure, bar, legend
+      ]),
+      el("div", {}, [
+        el("p", { class: "eyebrow" }, [document.createTextNode("收藏夹概览")]),
+        p("共 " + state.folders.length + " 个收藏夹，累计 " + total + " 个视频。优先挑选真正想复盘的收藏夹开始。")
+      ])
+    ])
+  ]);
+}
+function folderCard(){
+  const list = el("div");
+  if (!state.folders.length){
+    list.appendChild(el("div", { class: "empty" }, [iconBox("folder"), p("暂无收藏夹或读取失败，可点击右上角刷新。")]));
+  }
+  state.folders.forEach(f => {
+    const row = el("div", { class: "folder-row" + (state.activeFolder === f.media_id ? " active" : "") });
+    if (f.cover) row.appendChild(el("img", { class: "folder-cover", src: f.cover, alt: "", loading: "lazy", referrerpolicy: "no-referrer" }));
+    else row.appendChild(el("div", { class: "folder-cover" }));
+    row.appendChild(el("div", { class: "folder-meta" }, [el("b", {}, [document.createTextNode(f.title)]), el("span", {}, [document.createTextNode("收藏夹")])]));
+    row.appendChild(el("span", { class: "folder-count", }, [document.createTextNode(String(f.count))]));
+    row.addEventListener("click", () => { state.activeFolder = f.media_id; state.selected.clear(); loadResources(f.media_id); });
+    list.appendChild(row);
+  });
+  return el("div", { class: "card" }, [el("div", { class: "card-head" }, [el("h2", {}, [document.createTextNode("选择收藏夹")])]), list]);
+}
+function urlBar(){
+  const input = el("input", { class: "input", placeholder: "粘贴B站视频链接或BV号，回车解析添加", style: "flex:1" });
+  const btn = el("button", { class: "btn btn-secondary btn-sm" }, [document.createTextNode("解析添加")]);
+  const doResolve = async () => {
+    const u = input.value.trim();
+    if (!u) return;
+    btn.disabled = true; btn.textContent = "解析中…";
+    try {
+      const r = await api("/api/bilibili/resolve?url=" + encodeURIComponent(u));
+      const it = r.item;
+      if (!state.resources.some(v => v.bvid === it.bvid)) state.resources.unshift(it);
+      state.selected.add(it.bvid);
+      input.value = "";
+      toast("已添加：" + it.title);
+      renderPick();
+    } catch (e){ toast(e.message); }
+    btn.disabled = false; btn.textContent = "解析添加";
+  };
+  btn.addEventListener("click", doResolve);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") doResolve(); });
+  return el("div", { class: "card", style: "display:flex;gap:8px;align-items:center;padding:12px 16px" }, [input, btn]);
+}
+function pickCard(){
+  const folder = state.folders.find(f => f.media_id === state.activeFolder);
+  const head = el("div", { class: "card-head" }, [
+    el("h2", {}, [document.createTextNode(folder ? folder.title : "收藏内容")]),
+    el("span", { class: "muted num" }, [document.createTextNode("已选 " + state.selected.size + " / " + state.resources.length)])
+  ]);
+  const grid = el("div", { class: "video-grid" });
+  if (!state.resources.length) grid.appendChild(el("div", { class: "empty" }, [iconBox("video"), p("该收藏夹暂无可读取的视频。")]));
+  state.resources.forEach(v => grid.appendChild(videoCard(v)));
+  const bar = el("div", { class: "pickbar" }, [
+    el("button", { class: "btn btn-secondary btn-sm", onclick: selectAll }, [document.createTextNode("全选")]),
+    el("button", { class: "btn btn-secondary btn-sm", onclick: clearAll }, [document.createTextNode("清空")]),
+    el("div", { class: "spacer" }),
+    styleSegmented(),
+    el("button", { class: "btn btn-primary", onclick: generate }, [svgIcon("sparkles"), document.createTextNode("生成知识笔记")])
+  ]);
+  return el("div", { class: "card" }, [head, grid, bar]);
+}
+function videoCard(v){
+  const card = el("div", { class: "vcard" + (state.selected.has(v.bvid) ? " selected" : "") });
+  const thumb = el("div", { class: "thumb" });
+  if (v.cover) thumb.appendChild(el("img", { src: v.cover, alt: "", loading: "lazy", referrerpolicy: "no-referrer" }));
+  thumb.appendChild(el("div", { class: "check" }, [svgIcon("check")]));
+  thumb.appendChild(el("span", { class: "dur num" }, [document.createTextNode(fmtDur(v.duration))]));
+  const body = el("div", { class: "body" }, [
+    el("b", {}, [document.createTextNode(v.title || v.bvid)]),
+    el("div", { class: "by" }, [svgIcon("user"), document.createTextNode(v.owner || "未知 UP 主")])
+  ]);
+  card.appendChild(thumb); card.appendChild(body);
+  card.addEventListener("click", () => {
+    if (state.selected.has(v.bvid)) state.selected.delete(v.bvid); else state.selected.add(v.bvid);
+    renderPick();
+  });
+  return card;
+}
+function selectAll(){ state.resources.forEach(v => state.selected.add(v.bvid)); renderPick(); }
+function clearAll(){ state.selected.clear(); renderPick(); }
+function styleSegmented(){
+  const seg = el("div", { class: "segmented" });
+  [["knowledge", "知识"], ["outline", "大纲"], ["exam", "考点"], ["podcast", "口语"]].forEach(([k, label]) => {
+    const b = el("button", { "aria-pressed": String(state.style === k) }, [document.createTextNode(label)]);
+    b.addEventListener("click", () => { state.style = k; renderPick(); });
+    seg.appendChild(b);
+  });
+  return seg;
+}
+async function generate(){
+  if (!state.selected.size){ toast("请先选择至少一个视频"); return; }
+  const videos = state.resources.filter(v => state.selected.has(v.bvid)).map(v => ({
+    bvid: v.bvid, title: v.title, owner: v.owner, cover: v.cover, duration: v.duration
+  }));
+  try {
+    await api("/api/notes/jobs", { method: "POST", body: JSON.stringify({ videos, style: state.style }) });
+    toast("任务已创建，正在后台生成");
+    state.selected.clear();
+    await loadJobs();
+    navTo("jobs");
+  } catch (e){ toast(e.message); }
+}
+
+/* ═══════════ 任务 ═══════════ */
+async function loadJobs(){
+  try { const r = await api("/api/notes/jobs"); state.jobs = r.jobs || []; }
+  catch (e){ state.jobs = []; }
+  $("#navJobs").textContent = state.jobs.filter(j => j.status === "running" || j.status === "pending").length;
+  if (currentNav() === "jobs") renderJobs();
+  const running = state.jobs.some(j => j.status === "running" || j.status === "pending");
+  if (running && !state.polling) state.polling = setInterval(refreshRunning, 2500);
+  if (!running && state.polling){ clearInterval(state.polling); state.polling = null; }
+}
+function currentNav(){ const a = $$(".nav-item").find(b => b.getAttribute("aria-current") === "true"); return a ? a.dataset.nav : "pick"; }
+async function refreshRunning(){
+  try {
+    const r = await api("/api/notes/jobs"); state.jobs = r.jobs || [];
+  } catch (e){ return; }
+  if (currentNav() === "jobs") renderJobs();
+  const running = state.jobs.some(j => j.status === "running" || j.status === "pending");
+  if (!running){ clearInterval(state.polling); state.polling = null; await loadNotes(); }
+}
+function renderJobs(){
+  const root = $("#viewRoot"); root.innerHTML = "";
+  if (!state.jobs.length){ root.appendChild(el("div", { class: "card empty" }, [iconBox("inbox"), h3("还没有生成任务"), p("到「收藏夹选片」勾选视频后即可创建。")])); return; }
+  state.jobs.forEach(j => root.appendChild(jobCard(j)));
+}
+function jobCard(j){
+  const card = el("div", { class: "job-card" });
+  const top = el("div", { class: "job-top" }, [
+    el("b", {}, [document.createTextNode(j.title)]),
+    el("span", { class: "pill " + j.status }, [document.createTextNode(statusText(j.status))]),
+    el("div", { class: "spacer" }),
+    el("span", { class: "muted num", style: "font-size:12px" }, [document.createTextNode(j.created_at)])
+  ]);
+  const pct = j.total ? Math.round((j.done + j.failed) / j.total * 100) : 0;
+  card.appendChild(top);
+  card.appendChild(el("div", { class: "progress" }, [el("span", { style: "width:" + pct + "%" })]));
+  card.appendChild(el("p", { class: "muted", style: "margin-top:8px;font-size:12.5px" }, [document.createTextNode(j.message || ("进度 " + (j.done + j.failed) + "/" + j.total))]));
+  return card;
+}
+function statusText(s){ return { pending: "排队中", running: "生成中", done: "已完成", failed: "部分失败" }[s] || s; }
+
+/* ═══════════ 笔记 ═══════════ */
+async function loadNotes(){
+  // 汇总所有已完成任务中的条目
+  const notes = [];
+  for (const j of state.jobs){
+    if (j.status === "pending" || j.status === "running") continue;
+    try {
+      const d = await api("/api/notes/jobs/" + j.id);
+      (d.items || []).forEach(it => { if (it.status === "done") notes.push(Object.assign({ job: j.title }, it)); });
+    } catch (e){}
+  }
+  state.notes = notes;
+  $("#navNotes").textContent = notes.length;
+  if (currentNav() === "notes") renderNotes();
+}
+function renderNotes(){
+  const root = $("#viewRoot"); root.innerHTML = "";
+  if (!state.notes.length){ root.appendChild(el("div", { class: "card empty" }, [iconBox("file"), h3("还没有生成好的笔记"), p("生成任务完成后，笔记会汇总到这里。")])); return; }
+  const list = el("div", { class: "card" });
+  state.notes.forEach(n => {
+    const line = el("div", { class: "item-line" }, [
+      el("span", { class: "st-dot st-done" }),
+      el("span", { class: "t", title: n.title }, [document.createTextNode(n.title || n.bvid)]),
+      el("span", { class: "muted", style: "font-size:12px" }, [document.createTextNode(n.owner || "")]),
+      el("button", { class: "btn btn-secondary btn-sm", onclick: () => openNote(n.id) }, [document.createTextNode("查看")])
+    ]);
+    list.appendChild(line);
+  });
+  root.appendChild(list);
+}
+async function openNote(id){
+  let currentNoteId = id;
+  window.__currentNoteId = id;
+  try {
+    const n = await api("/api/notes/items/" + id);
+    $("#noteTitle").textContent = n.title || n.bvid;
+    $("#noteBody").innerHTML = renderMarkdown(n.note_md || "（暂无内容）");
+    $("#noteDrawer").hidden = false;
+    $("#noteExport").onclick = () => { window.location.href = API + "/api/notes/items/" + id + "/markdown"; };
+  } catch (e){ toast(e.message); }
+}
+
+/* ═══════════ ima 知识库连接 ═══════════ */
+$("#imaBtn").addEventListener("click", openImaModal);
+$("#imaClose").addEventListener("click", () => { $("#imaModal").hidden = true; });
+$("#imaModal").addEventListener("click", e => { if (e.target.dataset.close === "ima"){ $("#imaModal").hidden = true; } });
+async function openImaModal(){
+  $("#imaModal").hidden = false;
+  $("#imaStatus").textContent = "";
+  try {
+    const cfg = await api("/api/ima/config");
+    if (cfg.bound){
+      $("#imaClientId").value = cfg.client_id || "";
+      $("#imaApiKey").placeholder = "已保存（" + (cfg.api_key_masked || "已配置") + "），可重新输入覆盖";
+      $("#imaStatus").textContent = "已绑定，可点击「测试连通」验证";
+    }
+  } catch (e){ /* 静默 */ }
+}
+async function imaBind(){
+  const client_id = $("#imaClientId").value.trim();
+  const key = $("#imaApiKey").value.trim();
+  if (!client_id || !key){ $("#imaStatus").textContent = "请先填写 Client ID 和 API Key"; return; }
+  $("#imaStatus").textContent = "正在验证并保存…";
+  try {
+    const r = await api("/api/ima/bind", { method: "POST", body: JSON.stringify({ client_id, api_key: key }) });
+    $("#imaStatus").textContent = "✅ " + r.message;
+    $("#imaApiKey").value = "";
+    const names = (r.knowledge_bases || []).map(k => k.name).join("、");
+    if (names) $("#imaStatus").textContent += "（" + names + "）";
+  } catch (e){ $("#imaStatus").textContent = "❌ " + e.message; }
+}
+async function imaTest(){
+  // 优先用输入框中的新值做绑定式校验；若输入框为空则测试已保存配置
+  if ($("#imaClientId").value.trim() && $("#imaApiKey").value.trim()){ await imaBind(); return; }
+  $("#imaStatus").textContent = "正在测试连通…";
+  try {
+    const r = await api("/api/ima/test", { method: "POST" });
+    $("#imaStatus").textContent = "✅ " + r.message;
+    const names = (r.knowledge_bases || []).map(k => k.name).join("、");
+    if (names) $("#imaStatus").textContent += "（" + names + "）";
+  } catch (e){ $("#imaStatus").textContent = "❌ " + e.message; }
+}
+$("#imaSaveBtn").addEventListener("click", imaBind);
+$("#imaTestBtn").addEventListener("click", imaTest);
+
+/* ═══════════ 推送笔记到 ima ═══════════ */
+$("#notePushIma").addEventListener("click", openPushIma);
+$("#imaPushClose").addEventListener("click", () => { $("#pushImaModal").hidden = true; });
+$("#pushImaModal").addEventListener("click", e => { if (e.target.dataset.close === "pushima"){ $("#pushImaModal").hidden = true; } });
+async function openPushIma(){
+  const id = window.__currentNoteId;
+  if (!id){ $("#imaPushStatus").textContent = "请先打开一篇笔记"; return; }
+  $("#pushImaModal").hidden = false;
+  $("#imaPushStatus").textContent = "";
+  $("#imaPushTitle").value = $("#noteTitle").textContent || "";
+  const sel = $("#imaKbSelect");
+  sel.innerHTML = '<option value="">加载中…</option>';
+  try {
+    const cfg = await api("/api/ima/config");
+    if (!cfg.bound){ $("#imaPushStatus").textContent = "❌ 尚未绑定 ima，请先在侧栏完成连接"; sel.innerHTML = ""; return; }
+    const r = await api("/api/ima/kb-list");
+    const kbs = r.knowledge_bases || [];
+    if (!kbs.length){ sel.innerHTML = '<option value="">（无可添加的知识库）</option>'; return; }
+    sel.innerHTML = kbs.map(k => `<option value="${k.id}">${k.name}</option>`).join("");
+  } catch (e){
+    $("#imaPushStatus").textContent = "❌ " + e.message;
+    sel.innerHTML = "";
+  }
+}
+$("#imaPushGo").addEventListener("click", async () => {
+  const kb = $("#imaKbSelect").value;
+  if (!kb){ $("#imaPushStatus").textContent = "请先选择目标知识库"; return; }
+  const id = window.__currentNoteId;
+  $("#imaPushStatus").textContent = "正在推送…";
+  try {
+    // 实时从后端取笔记全文（Markdown），保证内容完整
+    const item = await api("/api/notes/items/" + id);
+    const md = item.note_md || "";
+    if (!md.trim()){ $("#imaPushStatus").textContent = "笔记内容为空，无法推送"; return; }
+    const r = await api("/api/ima/push", { method: "POST", body: JSON.stringify({
+      title: $("#imaPushTitle").value.trim() || item.title || "未命名笔记",
+      markdown: md,
+      knowledge_base_id: kb,
+    })});
+    $("#imaPushStatus").textContent = "✅ " + r.message;
+    setTimeout(() => { $("#pushImaModal").hidden = true; }, 1500);
+  } catch (e){ $("#imaPushStatus").textContent = "❌ " + e.message; }
+});
+
+/* ═══════════ 扫码绑定 ═══════════ */
+$("#bindBtn").addEventListener("click", startBind);
+$("#qrClose").addEventListener("click", () => { $("#qrModal").hidden = true; stopQrPoll(); });
+$("#qrModal").addEventListener("click", e => { if (e.target.dataset.close === "qr"){ $("#qrModal").hidden = true; stopQrPoll(); } });
+let qrTimer = null;
+function stopQrPoll(){ if (qrTimer){ clearInterval(qrTimer); qrTimer = null; } }
+async function startBind(){
+  $("#qrModal").hidden = false;
+  $("#qrBox").innerHTML = '<span class="spinner"></span>';
+  $("#qrStatus").textContent = "正在获取二维码…";
+  try {
+    const r = await api("/api/bilibili/qr");
+    $("#qrBox").innerHTML = '<img alt="B站登录二维码" src="' + r.image + '" />';
+    $("#qrStatus").textContent = "等待扫码…";
+    stopQrPoll();
+    qrTimer = setInterval(() => pollQr(r.qrcode_key), 2000);
+  } catch (e){ $("#qrStatus").textContent = e.message; }
+}
+async function pollQr(key){
+  try {
+    const r = await api("/api/bilibili/qr/poll?key=" + encodeURIComponent(key));
+    if (r.status === "scanned"){ $("#qrStatus").textContent = "已扫码，请在手机上确认登录"; }
+    else if (r.status === "confirmed"){
+      stopQrPoll();
+      $("#qrStatus").textContent = "绑定成功！";
+      state.account = await api("/api/bilibili/account");
+      renderAccount();
+      setTimeout(async () => { $("#qrModal").hidden = true; await loadFolders(); navTo("pick"); }, 700);
+    } else if (r.status === "expired"){ $("#qrStatus").textContent = "二维码已过期，请关闭后重试"; stopQrPoll(); }
+    else { $("#qrStatus").textContent = "等待扫码…"; }
+  } catch (e){ /* 轮询失败静默重试 */ }
+}
+
+/* ═══════════ DOM 辅助 ═══════════ */
+function el(tag, attrs = {}, children = []){
+  const n = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === "class") n.className = v;
+    else if (k === "style") n.setAttribute("style", v);
+    else if (k.startsWith("on") && typeof v === "function") n.addEventListener(k.slice(2), v);
+    else if (v !== undefined && v !== null) n.setAttribute(k, v);
+  });
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c == null) return;
+    n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  });
+  return n;
+}
+function h3(t){ return el("h3", {}, [document.createTextNode(t)]); }
+function p(t){ return el("p", {}, [document.createTextNode(t)]); }
+function iconBox(name){ const d = el("div"); d.innerHTML = svgIcon(name).outerHTML; const s = d.firstElementChild; s.style.width = "34px"; s.style.height = "34px"; s.style.margin = "0 auto 12px"; s.style.color = "var(--border)"; return s; }
+const ICONS = {
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  sparkles: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>',
+  folder: '<path d="M4 6h5l2 2h9v11H4z"/>',
+  video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/>',
+  inbox: '<path d="M4 13h4l2 3h4l2-3h4"/><path d="M5 5h14l1 8v6H4v-6z"/>',
+  file: '<path d="M6 3h8l4 4v14H6z"/><path d="M9 12h6M9 16h6"/>'
+};
+function svgIcon(name){
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("class", "icon"); s.setAttribute("viewBox", "0 0 24 24");
+  s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor");
+  s.setAttribute("stroke-width", "1.8"); s.setAttribute("stroke-linecap", "round"); s.setAttribute("stroke-linejoin", "round");
+  s.innerHTML = ICONS[name] || "";
+  return s;
+}
+
+/* 抽屉关闭 */
+document.addEventListener("click", e => { if (e.target.dataset && e.target.dataset.close === "note") $("#noteDrawer").hidden = true; });
+
+/* 会话自检 */
+(async function init(){
+  try {
+    const r = await fetch(API + "/api/auth/session", { credentials: "same-origin" });
+    if (r.ok) await boot(); else showLogin();
+  } catch (e){ showLogin(); }
+})();
+</script>
+</body>
+</html>
