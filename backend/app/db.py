@@ -75,8 +75,11 @@ def _build_engine() -> Engine:
 
     url = normalize_database_url(database_url)
     connect_args: dict[str, object] = {}
-    # Supabase 连接池 / Neon pooled 端口走事务级 PgBouncer，必须关闭预处理语句
-    if "pooler.supabase" in url or ":6543/" in url:
+    # 连接池端点走事务级 PgBouncer，必须关闭 psycopg3 预处理语句，否则必报
+    # "prepared statement already exists"：
+    #   Supabase  → pooler.supabase.com / 端口 6543
+    #   Neon      → ep-xxx-pooler.<region>.aws.neon.tech（端口仍是 5432）
+    if "pooler.supabase" in url or ":6543/" in url or "-pooler." in url:
         connect_args["prepare_threshold"] = None
     logger.info("使用托管数据库：%s", url.split("@")[-1])
     return create_engine(url, connect_args=connect_args, poolclass=NullPool, future=True)
