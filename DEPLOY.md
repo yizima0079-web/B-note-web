@@ -14,6 +14,7 @@
 |---|---|---|
 | `SECRET_KEY` | 签发会话 JWT + 派生 Fernet 密钥加密 B 站凭证 | 伪造会话、解密凭证 |
 | `APP_PASSWORD` | 网页访问口令 | 直接登录 |
+| `DATABASE_URL` | 托管 Postgres（Supabase / Neon）连接串 | 拖库、改数据 |
 | `LLM_API_KEY` | DeepSeek / OpenAI 兼容接口 | 盗刷额度 |
 | `TENCENT_APPID` / `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` | 腾讯云 ASR | 盗刷额度 |
 | `ASR_API_KEY` | Groq / OpenAI 兼容 ASR | 盗刷额度 |
@@ -22,6 +23,30 @@
 > 本项目前端是后端托管的单文件 `frontend/index.html`，不读构建期变量，
 > 因此 **不存在** `NEXT_PUBLIC_*`。将来若接入 Next.js：可公开的才加 `NEXT_PUBLIC_` 前缀，
 > 服务端密钥（Supabase service role key、本表所有项）严禁加该前缀，否则会被打进浏览器 bundle。
+
+## 数据库：必须用托管 Postgres
+
+`DATABASE_URL` 为空时回退 SQLite，Vercel 上只能写 `/tmp`：**不持久、实例间不共享，冷启动即清空**，
+只够跑演示，存不了任何需要留存的数据。生产一律配托管库，按推荐度排序：Supabase / Neon（免费额度够用）> Railway > 自建。
+
+配置要点：
+
+1. 取 **连接池连接串**，不要用直连端口。Supabase 选 Transaction pooler（端口 `6543`），Neon 选 `-pooler` 主机名。
+2. 代码已自动处理两件事：`postgres://` / `postgresql://` 前缀统一改写为 `postgresql+psycopg://`；
+   检测到 `pooler.supabase` 或 `:6543/` 时自动关闭 psycopg3 预处理语句（否则 PgBouncer 事务模式必报错）。
+3. 连接池固定 `NullPool`：Serverless 实例会被冻结/回收，进程内连接池只会积累死连接。
+4. Preview 环境接**测试库或独立 branch**，不要与 Production 共用。
+5. 建表由 `init_db()` 在启动时执行（`create_all`，幂等），**导入期不写文件系统**——
+   正是这一点让模块能在只读文件系统上被 import。
+
+## 排障：先看 Runtime Logs
+
+Vercel 控制台 → 项目 `b-note-web` → Logs → Runtime Logs。
+
+- 应用启动会打印一行 `启动：backend=postgres(DATABASE_URL)|sqlite serverless=... data_dir=...`，直接确认生效的是哪种库。
+- 回退 SQLite 时额外打 WARNING，含实际落盘路径。
+- 导入期异常（历史版本在 `db.py` 顶层 `os.makedirs`）会表现为函数初始化失败、`EROFS` / `Permission denied`，
+  这类 traceback 只在 Runtime Logs 里，构建日志看不到。
 
 ## Vercel 配置步骤
 
@@ -43,11 +68,11 @@ Preview 环境建议接独立的测试库 / 测试 Key，避免预览站污染�
 
 ## 现实约束（重要）
 
-当前代码是 **FastAPI + SQLite + asyncio 后台任务队列** 的单体服务：
+数据层已解耦（`DATABASE_URL`），剩下的是执行层约束。当前是 **FastAPI + asyncio 进程内队列** 的单体服务：
 
-- Vercel Serverless 函数无持久磁盘，`backend/data/*.db` 写进去下次调用就没了；
-- 生成笔记是长任务（抓字幕 → 调 LLM → 落库，单次可达数分钟），会超出函数执行上限；
-- `asyncio` 队列随实例回收而丢失，任务进度无法保证。
+- 生成笔记是长任务（抓字幕 → 调 LLM → 落库，单次可达数分钟），会超出 Serverless 函数执行上限；
+- `asyncio` 队列活在单个进程里，实例回收即丢失，且不跨实例共享，任务进度无法保证；
+- 每个 Vercel 实例是独立进程，同一任务可能落在不同实例上。
 
 因此把整个仓库直接部署到 Vercel **跑不通业务流程**。三条路，按推荐度排序：
 

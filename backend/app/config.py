@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     session_ttl_hours: int = 72
 
     # 存储
+    # 托管 Postgres 连接串（Supabase / Neon / Railway 等）。留空则回退本地 SQLite。
+    # 生产与 Vercel 环境必须配置，否则数据写进临时目录，冷启动即丢。
+    database_url: str = ""
+    # 仅当 database_url 为空时生效：SQLite 数据目录
     data_dir: str = "./data"
 
     # 大模型

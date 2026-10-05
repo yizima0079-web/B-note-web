@@ -117,11 +117,16 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 | `SECRET_KEY` | 会话签名 + 凭证加密根密钥，**务必改为随机长串** |
 | `APP_PASSWORD` | 网页登录口令 |
 | `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` | 任意 OpenAI 兼容接口（DeepSeek / 通义 / Kimi / OpenAI / Ollama） |
-| `DATA_DIR` | SQLite 及数据目录，默认 `./data` |
+| `DATABASE_URL` | 托管 Postgres 连接串（Supabase / Neon 等）。**生产与 Serverless 必填** |
+| `DATA_DIR` | 仅当 `DATABASE_URL` 为空时生效：SQLite 数据目录，默认 `./data` |
+
+> 未配 `DATABASE_URL` 时回退 SQLite。在 Vercel 这类只读文件系统上会强制写到 `/tmp`，
+> 不持久、实例间不共享，**只能演示**；任何需要留存的数据（账号、笔记、积分、排名）都必须走托管 Postgres。
 
 ### 云平台部署
 - **Railway / Render / Fly.io**：直接以 `Dockerfile` 构建，挂载持久卷到 `/app/backend/data`。
 - **VPS**：`docker compose up -d`，用 Nginx/Caddy 反代并启用 HTTPS（记得设 `COOKIE_SECURE=true`）。
+- **Supabase / Neon**：在环境变量里配 `DATABASE_URL`（用连接池串），表结构由启动时的 `init_db()` 自动创建。
 - 前端与后端同源部署，无需额外跨域配置。
 
 ---

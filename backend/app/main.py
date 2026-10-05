@@ -3,15 +3,19 @@ from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
-from .db import init_db
+from .db import init_db, is_serverless
 from .routers import auth, bilibili, ima, notes
 from .services.task_queue import TaskQueue
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("bilirecall")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
@@ -19,8 +23,15 @@ FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings = get_settings()
+    logger.info(
+        "启动：backend=%s serverless=%s data_dir=%s",
+        "postgres(DATABASE_URL)" if settings.database_url else "sqlite",
+        is_serverless(),
+        settings.data_dir,
+    )
     init_db()
-    notes.set_queue(TaskQueue(max_concurrency=get_settings().max_concurrent_tasks))
+    notes.set_queue(TaskQueue(max_concurrency=settings.max_concurrent_tasks))
     yield
 
 
